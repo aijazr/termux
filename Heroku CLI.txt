@@ -37,3 +37,56 @@ heroku-cli/6.15.31–958455a (android-arm64) node-v8.10.0
 Now to log into your Heroku account in the CLI:
 heroku login
 When asked, press any key (expect ‘q’) to open a web browser and login your Heroku account.
+
+
+
+ALTERNATE METHOD
+
+
+
+
+
+
+
+
+Standard Heroku Installation:
+Now follow the instruction from Heroku documentation site with some tweeks for Termux:
+$ wget http://cli-assets.heroku.com/heroku-cli/channels/stable/heroku-cli-linux-x64.tar.gz -O heroku.tar.gz
+$ tar -xvzf heroku.tar.gz -C heroku
+$ mv heroku /data/data/com.termux/files/usr/lib/heroku
+$ ln -s /data/data/com.termux/files/usr/lib/heroku/bin/heroku /data/data/com.termux/files/usr/bin/heroku
+
+Tweekings 1 - heroku script:
+Installation of Heroku is now done, but it doesn't work as is because I just installed Linux version of tarball in Termux on Android. If heroku is executed now, it'll give you some error messages:
+$ heroku
+bash: /data/data/com.termux/files/usr/bin/heroku: /usr/bin/env: bad interpreter: No such file or directory
+
+This is because the heroku script is pointing to /usr/bin/env for bash. This needs to be changed to correct path for Termux:
+$ cd /data/data/com.termux/files/usr/lib/heroku/bin/
+$ vim heroku
+#!/usr/bin/env bash
+set -e
+...
+Change the first line from #!/usr/bin/env bash to #!/data/data/com.termux/files/usr/bin/env bash, and save the file.
+
+Tweekings 2 - node binary:
+The tarball downloaded contains node.js binary for auto update but this binary doesn't seem to work in Termux and it would give an Exec format error:
+$ heroku
+/data/data/com.termux/files/usr/bin/heroku: line 29: /data/data/com.termux/files/usr/lib/heroku/bin/node: cannot execute binary file: Exec format error
+
+To work around this problem, I installed node.js separately and made a symlink. This seemed working and no more Exec format error:
+$ apt-get install nodejs
+...
+$ cd /data/data/com.termux/files/usr/lib/heroku/bin
+$ mv node node.old
+$ ln -s ../../../bin/node node
+$ heroku --version
+heroku-cli/6.15.31-958455a (android-arm64) node-v8.10.0
+$ heroku login
+Enter your Heroku credentials:
+Email: ***
+Password: ***
+Logged in as ***
+$
+
+
